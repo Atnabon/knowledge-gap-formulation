@@ -136,4 +136,19 @@ Before any blog or thread ships under my identity:
 ---
 
 > Find the gap. Sharpen the question. Teach what you just learned. Edit what you already shipped.
-# knowledge-gap-formulation
+
+---
+
+## Day 1 submission (2026-05-04)
+
+**Topic:** Inference-time mechanics
+**Pair:** Atnabon Deressa ↔ Efrate
+**Folder:** [`pair_DAY_1/`](pair_DAY_1/)
+
+| Rubric line | File |
+|---|---|
+| Question Sharpness | [`pair_DAY_1/question.md`](pair_DAY_1/question.md), [`pair_DAY_1/morning_call_summary.md`](pair_DAY_1/morning_call_summary.md) |
+| Explainer Depth | [`pair_DAY_1/explainer.md`](pair_DAY_1/explainer.md), [`pair_DAY_1/thread.md`](pair_DAY_1/thread.md), [`pair_DAY_1/sources.md`](pair_DAY_1/sources.md), [`pair_DAY_1/signoff.md`](pair_DAY_1/signoff.md) |
+| Hands-on tool run | [`canonical/day1_prefix_cache_probe.py`](canonical/day1_prefix_cache_probe.py), [`canonical/day1_prefix_cache_probe_results.md`](canonical/day1_prefix_cache_probe_results.md) |
+| Grounding commit | [`pair_DAY_1/grounding_commit.md`](pair_DAY_1/grounding_commit.md) (lands in `sales-eval-bench` Week 11 repo) |
+
