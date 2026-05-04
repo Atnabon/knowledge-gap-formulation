@@ -1,0 +1,25 @@
+# env
+.env
+.env.local
+.venv/
+venv/
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.ipynb_checkpoints/
+
+# os
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# secrets
+*.key
+*api_key*
