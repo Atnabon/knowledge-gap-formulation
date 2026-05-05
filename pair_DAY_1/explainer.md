@@ -1,6 +1,6 @@
 # What a Prefix-Cache Hit Actually Caches — and What Invalidates It
 
-**Written for:** Efrate's gap on _"At the design level a Forward-Deployed Engineer needs, what specifically gets invalidated on a prefix-cache miss versus a hit, and through what mechanism does that change my per-call latency and cost?"_
+**Written for:** Ephrata gap on _"At the design level a Forward-Deployed Engineer needs, what specifically gets invalidated on a prefix-cache miss versus a hit, and through what mechanism does that change my per-call latency and cost?"_
 **By:** Atnabon Deressa
 **Date:** 2026-05-04
 **Length:** ~ 980 words

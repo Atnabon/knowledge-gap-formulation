@@ -3,7 +3,7 @@
 **Topic:** Inference-time mechanics
 **Subtopic:** The actual cost of a single inference call broken into prefill and decode phases
 **Asker:** Atnabon Deressa
-**Partner (explainer):** Efrate
+**Partner (explainer):** Ephrata nebiyu
 **Date:** 2026-05-04
 **Status:** Final (post morning-call)
 
