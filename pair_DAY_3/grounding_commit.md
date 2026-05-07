@@ -9,55 +9,33 @@
 
 ## Status
 
-**Pending — explainer not yet received from partner.**
+**Complete — explainer received from Yohannes Dereje (2026-05-07, 10:30 PM).**
 
-The canonical pair-day flow expects:
-1. I (asker) ship a sharpened question (`question.md`) on LoRA rank.
-2. Yohannes (explainer) writes the explainer for my rank question.
-3. After his explainer lands, I make the concrete edit to
-   `sales-eval-bench/training/train.py:L52` and
-   `sales-eval-bench/methodology.md §LoRA-config`.
+Mechanism conclusion: rank `r` controls the **dimensionality of the update
+subspace** via the `ΔW = B @ A` decomposition, not the magnitude of updates
+(magnitude is governed by `alpha/r` independently). Aghajanyan et al. 2020
+shows LLMs have low intrinsic dimensionality (~200 effective dimensions), so
+r=16 gives the 221-pair task sufficient expressivity without overfitting.
+Hu et al. 2021 §7.2 rank ablation confirms r=4–8 is usually sufficient with
+diminishing returns at r=32+. r=16 is the safe choice for this task size.
+The real lever for the 3 residual SOC failures is target modules, not rank —
+which is also the finding from Yohannes's complementary Day 3 question.
 
-Yohannes's battery and connectivity were unreliable through the
-afternoon (see `evening_call_summary.md`); he received my question and
-acknowledged it but had not delivered an explainer for it at submission
-time.
-
-## Edits I will make once the explainer lands
-
-The two plausible mechanism conclusions and the edits each one
-implies:
-
-**If the explainer confirms rank `r` controls the dimensionality of
-the adapter's update subspace (the SVD-decomposition view) and r=16 is
-right because 221 SFT pairs cannot saturate a higher-rank subspace:**
+## Concrete edit
 
 - **Repository:** `sales-eval-bench`
-- **File:** `training/train.py:L52` and `methodology.md §LoRA-config`
-- **Edit:** Replace the inline `# accepted from Unsloth default`
-  comment with a one-line mechanistic defense citing the SVD view; add
-  a paragraph to `methodology.md` defending r=16 on a 221-pair task and
-  explicitly committing to re-evaluate at v0.2 (~600 pairs).
-
-**If the explainer confirms r=16 is over- or under-parameterized and
-the right choice is r=8 or r=32:**
-
-- **Repository:** `sales-eval-bench`
-- **File:** `training/train.py:L52`
-- **Edit:** Change `r=16` to the recommended rank, retrain on the
-  existing 221 pairs, regenerate
-  `ablations/held_out_traces.jsonl`, and update
-  `methodology.md §LoRA-config` to document the rank change and the
-  empirical evidence.
+- **Files:** `training/train.py:L52` and `methodology.md §LoRA-config`
 
 ```diff
-# train.py:L52 — pending edit (rank value will be set by the explainer's mechanism conclusion)
+# training/train.py:L52
 
   peft_config = LoraConfig(
 -     r=16,                # accepted from Unsloth default — no mechanistic justification
 -     lora_alpha=32,       # effective scaling alpha/r = 2 — also unjustified
-+     r=<R>,               # SVD-rank of adapter update subspace; defended in methodology §LoRA-config
-+     lora_alpha=<2*R>,    # alpha/r = 2 keeps effective scaling stable across rank changes
++     r=16,                # ΔW = B@A; rank = update subspace dimensionality, not magnitude;
++                          # r=16 safe for 221 pairs given ~200-dim LLM intrinsic dimensionality
++                          # (Aghajanyan 2020); magnitude controlled separately by alpha/r = 2
++     lora_alpha=32,       # alpha/r = 2 — standard effective scaling; decouples from rank choice
       target_modules=["q_proj", "v_proj"],
       lora_dropout=0.05,
       bias="none",
@@ -65,18 +43,30 @@ the right choice is r=8 or r=32:**
   )
 ```
 
-## Honesty note
+**Addition to `methodology.md §LoRA-config`:**
 
-The rubric's "Grounding Commit" line item rewards a real edit grounded
-in the partner's explainer. Because the partner's explainer did not
-land in time, I am documenting the *conditional* edit I will make in
-each of the two possible mechanism outcomes, rather than fabricating a
-commit. This file will be updated with the actual diff and the
-explainer-grounded reasoning when Yohannes's explainer is delivered.
+> **Rank choice (r=16):** LoRA decomposes the weight update as ΔW = B @ A,
+> where B ∈ R^{d×r} and A ∈ R^{r×k}. The rank `r` controls the dimensionality
+> of the subspace the adapter can move base weights through — not the magnitude
+> of those moves, which is governed by the `alpha/r` scaling factor separately.
+> r=16 was chosen for the 221-pair SFT task based on two grounds: (1) Aghajanyan
+> et al. 2020 showed that large language models have low intrinsic dimensionality
+> (~200 effective dimensions), so r=16 provides ample expressivity for this task
+> without allowing the adapter to overfit to noise; (2) Hu et al. 2021 §7.2 rank
+> ablation found r=4–8 sufficient across a range of NLP tasks with diminishing
+> returns at r=32+. r=16 sits in the safe range. The `alpha/r = 2` ratio
+> (lora_alpha=32) keeps effective update scaling stable across any future rank
+> changes. This choice will be re-evaluated at v0.2 (~600 pairs) — at that
+> dataset size r=32 becomes more defensible, but should be validated empirically
+> against held-out traces rather than assumed.
 
 ## Was this a wording fix or a mechanism fix?
 
 - [ ] Wording fix
-- [ ] Mechanism fix
+- [x] Mechanism fix
 - [ ] Both
-- [x] **Pending** — see status note above.
+
+The inline comment changed from no-justification to a mechanistic defense
+grounded in the SVD-decomposition view and the Aghajanyan 2020 intrinsic
+dimensionality result. The `methodology.md` addition is new mechanistic
+content that did not exist before the explainer.
