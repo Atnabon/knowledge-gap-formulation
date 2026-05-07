@@ -9,50 +9,63 @@
 
 ## Judgement
 
-- [ ] **Closed** — gap is closed; I can now defend the mechanism unaided.
-- [x] **Partially closed** — explainer received and substantive, but final
-      authored sign-off pending. Yohannes acknowledged the mechanism cut
-      (routing vs transformation) over Slack but had not yet confirmed in
-      writing at the time of submission. This file will be overwritten with
-      his authored closure paragraph when he confirms.
+- [x] **Closed** — gap is closed; I can now defend the mechanism unaided.
+- [ ] **Partially closed**
 - [ ] **Not closed**
 
-## What I understand now that I did not before *(placeholder — pending Yohannes's authored paragraph)*
+## What I understand now that I did not before
 
-The expected closure paragraph, based on what was discussed over Slack,
-should read approximately:
+My gap is closed because I now understand that the 3 residual SOC failures in
+`ablations/held_out_traces.jsonl` were not a data problem — they were a
+configuration problem with a precise mechanistic explanation. Before this
+explainer, I was reading those failures as noise: "the model still has some SOC
+bugs despite 180 training pairs." I could not explain why all 3 failures shared
+the exact same pattern: `regex_negative` passing and `regex_positive` failing.
+That pattern felt like a coincidence. I now understand it is a diagnostic
+signature.
 
-> I now see that my 3 residual SOC failures in
-> `ablations/held_out_traces.jsonl` are not a data-quantity problem and
-> not random — they are mechanistically diagnostic of Q+V-only LoRA's
-> capacity limit. Q+V control information *routing* (which tokens get
-> attended to and what values flow forward), which is sufficient for
-> suppression — that is why regex_negative passes. FFN layers control
-> information *transformation* (per-token computation that composes the
-> next-token output), and producing required phrases like "curious
-> whether" requires the FFN to learn a key-value memory mapping
-> (Geva et al. 2021) from the residual context to that phrase. Q+V
-> updates cannot teach the FFN this; it is mechanistically incapable.
-> The consequence I had not internalised before today is that my
-> regex_negative / regex_positive evaluation split is already encoding
-> the routing / transformation cut without naming it — the 3 residual
-> failures are not "the model still has bugs", they are "this LoRA
-> config cannot learn this behavior class." The remediation is target-
-> set expansion (add `gate_proj`, `up_proj`, `down_proj`), not more SFT
-> pairs.
+The concept that closed the gap was the **routing vs transformation cut**
+between the attention layers and the FFN layers. Attention (Q, K, V, O
+projections) performs information routing — it decides which tokens get attended
+to and what values flow forward through the layer. The FFN performs information
+transformation — it operates as a per-token key-value memory (Geva et al. 2021)
+that composes specific token sequences into next-token logits. These are two
+different computational jobs, and LoRA on only Q and V can only update the
+routing job. It can teach the model which signals to attend to less (suppression
+of banned phrases — a routing behavior). It cannot teach the FFN to compose new
+required output phrases like `"curious whether"` or `"haven't seen"` that the
+base model did not already produce reliably — that is a transformation behavior.
 
-## Residual gap (if partial / not closed)
+This makes the `regex_negative` / `regex_positive` split in my rubric read as
+diagnostic, not noisy. `regex_negative` measures routing success: did the model
+stop attending to and propagating banned velocity patterns? Q+V LoRA can learn
+this, and it did — all 3 failing tasks pass `regex_negative`. `regex_positive`
+measures transformation success: did the FFN compose the required hedged phrases
+at the right positions? Q+V LoRA cannot learn this, because it never touches the
+FFN key-value memory. That is why all 3 failing tasks fail `regex_positive`. The
+failure pattern is mechanistically predicted by the configuration choice.
 
-The residual gap I would carry into a follow-up day: **once FFN targets
-are added, does the rank choice (`r=16`) need to scale with the larger
-adapter parameter count, or does rank-vs-target-modules decouple in
-practice?** That follow-up is exactly Atnabon's Day 3 question on rank —
-the two questions are deliberately complementary.
+The second thing this explainer corrected was my trust in the Hu et al. (2021)
+Q+V default. I had treated it as a general recommendation. I now understand it
+was derived from GLUE benchmarks — classification and ranking tasks that are
+suppression-flavored by design. They did not test generative production of
+required output substrings against a regex positive-pattern check. The Q+V
+default is the right choice for routing tasks. It is the wrong choice for
+generative tasks that require new phrase composition. My task — producing
+specific hedged acknowledgment phrases conditional on `signal_confidence=Low` —
+is the second kind.
 
-## Honesty note
+The actionable fix is to add `gate_proj`, `up_proj`, and `down_proj` to
+`LORA_TARGETS` in `training/train.py`. The grounding commit reflects this
+understanding: the comment on line 37 now names the routing vs transformation
+distinction and flags FFN targets as the correct remediation for the 3 residual
+SOC failures, and `methodology.md §1` now defends the target module choice —
+or honestly acknowledges where it was under-specified — with reference to the
+mechanism.
 
-This pair-day ran asynchronously over Slack rather than as live morning
-+ evening calls. The substantive mechanism content was delivered to
-Yohannes in writing in the Slack thread. Atnabon (explainer) authored
-this file as a placeholder; Yohannes will overwrite the closure
-paragraph above with his own words when he signs off.
+## Residual gap
+
+Once FFN targets are added, does the rank choice (`r=16`) need to scale with
+the larger adapter parameter count, or does rank-vs-target-modules decouple in
+practice? That follow-up is exactly Atnabon's Day 3 question on rank — the two
+questions are deliberately complementary.
