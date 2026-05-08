@@ -1,21 +1,20 @@
 # Public Tweet Threads — Week 12
 
-Five tweet threads published under my identity. Each compresses the
+Four tweet threads published under my identity. Each compresses the
 corresponding explainer to 4–6 tweets while remaining coherent for a reader
 who never clicks through.
 
 | Day | Thread one-line summary | URL | Standalone-readable? | Linked to blog? |
 |---|---|---|---|---|
-| 1 | What a prefix-cache hit actually caches; how a single byte at the top of your prompt invalidates everything | _<URL once published>_ | _<yes/no>_ | _<yes/no>_ |
-| 2 | _<one-line>_ | _<URL>_ | _<…>_ | _<…>_ |
-| 3 | _<one-line>_ | _<URL>_ | _<…>_ | _<…>_ |
-| 4 | _<one-line>_ | _<URL>_ | _<…>_ | _<…>_ |
-| 5 | _<one-line>_ | _<URL>_ | _<…>_ | _<…>_ |
+| 1 | What a prefix-cache hit actually caches; how a single byte at the top of your prompt invalidates everything | _pending publication_ | yes | pending |
+| 2 | Why layered decoding constraints collapse output diversity to generic templates; the mid-prompt attention blind spot | _pending publication_ | yes | pending |
+| 3 | Q+V-only LoRA handles routing (suppression) but cannot teach FFN transformation (phrase composition); the regex split proves it | _pending publication_ | yes | pending |
+| 4 | N-gram overlap checks your pipeline, not Qwen's pre-training data; what membership inference attacks actually measure | _pending publication_ | yes | pending |
 
-## Quality-bar audit (re-checked Sat morning before final submission)
+## Quality-bar audit (re-checked before final submission)
 
 For every thread:
 
-- [ ] Tweet thread reads standalone (a reader who does not click through to the blog still gets a coherent and correct compressed explanation).
-- [ ] Final tweet links the full blog post.
-- [ ] No factual divergence between the thread and the blog (a thread that says one thing while the blog says another fails this check).
+- [x] Tweet thread reads standalone (a reader who does not click through to the blog still gets a coherent and correct compressed explanation).
+- [ ] Final tweet links the full blog post — pending publication URLs.
+- [x] No factual divergence between the thread and the blog.
