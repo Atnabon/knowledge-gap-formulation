@@ -34,21 +34,45 @@
 - **Where I used it:** [Day 1 explainer](pair_DAY_1/explainer.md).
 - **Link:** <https://docs.claude.com/en/docs/build-with-claude/prompt-caching>
 
-### _<paper from Day 2>_
+### Liu et al. (2023) — *Lost in the Middle: How Language Models Use Long Contexts*
 
-_(Add as Day 2 lands.)_
+- **Why it earns the canon slot:** Names and quantifies the U-shaped
+  attention curve over long contexts — models attend strongly to
+  beginning and end, weakly to the middle — with the specific result that
+  mid-prompt information is computationally suppressed at decode time
+  even when it appears in the context. The load-bearing source for
+  diagnosing why enrichment data placed in the middle of a prompt
+  produces generic outputs.
+- **Where I used it:** [Day 2 explainer](pair_DAY_2/explainer.md) on mode
+  collapse in the Conversion Engine Draft stage.
+- **Link:** <https://arxiv.org/abs/2307.03172>
 
-### _<paper from Day 3>_
+### Hu et al. (2021) — *LoRA: Low-Rank Adaptation of Large Language Models*
 
-_(Add as Day 3 lands.)_
+- **Why it earns the canon slot:** §7.2 contains the rank ablation that
+  shows r=4–8 is sufficient across a range of NLP tasks with diminishing
+  returns at r=32+; §6.2 identifies which target modules matter for which
+  task types. The load-bearing source for rank choice and for understanding
+  why Q+V-only LoRA is inappropriate for generative phrase-composition tasks.
+- **Where I used it:** [Day 3 explainer](pair_DAY_3/explainer.md) and the
+  [Day 3 grounding commit](pair_DAY_3/grounding_commit.md) on
+  `training/train.py`.
+- **Link:** <https://arxiv.org/abs/2106.09685>
 
-### _<paper from Day 4>_
+### Shi et al. (2023) — *Detecting Pretraining Data from Large Language Models* (MIN-K% Prob)
 
-_(Add as Day 4 lands.)_
+- **Why it earns the canon slot:** Introduces MIN-K% Prob — the most
+  robust available method for base-model pre-training membership inference
+  without access to the training corpus. Uses minimum-probability tokens
+  rather than average perplexity, which eliminates the stopword-dominance
+  false-positive problem. The load-bearing source for the distinction between
+  held-out-partition contamination checks and base-model pre-training
+  contamination.
+- **Where I used it:** [Day 4 explainer](pair_DAY_4/explainer.md) on
+  membership inference for benchmark contamination.
+- **Link:** <https://arxiv.org/abs/2310.16789>
 
-### _<paper from Day 5>_
-
-_(Add as Day 5 lands.)_
+---
 
 ## Engineering tools / libraries (battle-tested in this week)
 
@@ -61,21 +85,18 @@ _(Add as Day 5 lands.)_
 - **Pattern:** see [`pair_DAY_1/explainer.md`](pair_DAY_1/explainer.md) for
   the 25-line probe; ~ $0.001 per run.
 
-### _<tool from Day 2>_
+### `scipy.stats` Clopper-Pearson CI + `binom_test` for binary eval comparison
 
-_(Add as Day 2 lands.)_
+- **Why it earns the canon slot:** every LLM benchmark comparison at small N
+  (< 200 samples) needs an exact binomial CI, not a t-interval. `scipy.stats`
+  provides both the exact Clopper-Pearson via `beta.ppf` and Fisher's exact via
+  `binom_test`. The 10-line probe in `canonical/day4_binomial_ci_probe.py` is
+  runnable in any Python environment with `scipy` installed and produces the CI
+  and p-value needed for a defensible methodology comparison table.
+- **Pattern:** see [`pair_DAY_4/grounding_commit.md`](pair_DAY_4/grounding_commit.md)
+  for the probe and the methodology diff.
 
-### _<tool from Day 3>_
-
-_(Add as Day 3 lands.)_
-
-### _<tool from Day 4>_
-
-_(Add as Day 4 lands.)_
-
-### _<tool from Day 5>_
-
-_(Add as Day 5 lands.)_
+---
 
 ## Engineering patterns (production-shaped)
 
@@ -90,11 +111,31 @@ _(Add as Day 5 lands.)_
   rate is auditable from day one.
 - **Reference implementation:** [`pair_DAY_1/grounding_commit.md`](pair_DAY_1/grounding_commit.md).
 
-### _<pattern from Day 2>_
+### LoRA target-module triage: route-vs-transform cuts tells you which projections to target
 
-_(Add as Day 2 lands.)_
+- **What:** before choosing LoRA target modules, classify the behavior you are
+  teaching as *routing* (suppressing or amplifying attention to tokens —
+  attention Q/V/K/O) or *transformation* (composing new token sequences from
+  key-value memory — FFN gate/up/down). Q+V-only is appropriate for routing
+  tasks; FFN modules are required for generative phrase-composition tasks.
+- **Why it earns the canon slot:** this triage prevents the Q+V-only default
+  from silently failing on generative rubric criteria while passing suppression
+  criteria, which is the exact failure mode visible in the `regex_positive`
+  vs `regex_negative` split in `held_out_traces.jsonl`.
+- **Reference implementation:** [`pair_DAY_3/grounding_commit.md`](pair_DAY_3/grounding_commit.md).
 
-_(… and so on through Day 5.)_
+### Binary eval table with Clopper-Pearson CI + Fisher's exact p-value
+
+- **What:** any version-comparison table in a benchmark methodology section
+  that reports pass-rates on binary outcomes must include the exact binomial
+  95% CI and a Fisher's exact p-value for the comparison. Bare point estimates
+  without CIs are not interpretable at small N.
+- **Why it earns the canon slot:** the 3/89 vs 0/89 difference in
+  `held_out_traces.jsonl` looks like a clear improvement as a point estimate
+  but has overlapping CIs and p=0.24 — which is the honest result, and it
+  changes the action (design v0.4 for ~350 samples rather than claiming
+  statistical significance).
+- **Reference implementation:** [`pair_DAY_4/grounding_commit.md`](pair_DAY_4/grounding_commit.md).
 
 ---
 
