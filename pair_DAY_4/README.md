@@ -1,6 +1,8 @@
-# Day 4 — _<Topic TBD by cohort vote evening of Day 3>_
+# Day 4 — Evaluation & statistics
 
-**Status:** Awaiting cohort vote. Topic and pairing published Thu morning.
+**Date:** 2026-05-08 (Fri)
+**Pair:** Atnabon Deressa ↔ Zemzem Hibet
+**Status:** Complete (async pair-day).
 
 ## Pre-staged candidate gaps (so Act II is real triage, not blank-page)
 
